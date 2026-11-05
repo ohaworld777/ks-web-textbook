@@ -70,6 +70,9 @@ td.go2{cursor:pointer}td.go2:hover{background:#f3f7ff}
 .mtag{position:absolute;right:12px;top:12px;background:#fff;color:var(--ink);font-size:12px;font-weight:800;padding:5px 10px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .empty{grid-column:1/-1;text-align:center;padding:50px 0;color:var(--muted)}
 .qr{cursor:pointer;background:#fff}
+.qr.sh{width:auto;padding:0 12px;white-space:nowrap;font-size:14px;color:var(--ink)}
+.qr.sh:hover{border-color:var(--c);color:var(--c)}
+.toast{position:fixed;left:50%;bottom:32px;transform:translateX(-50%);background:#14a05a;color:#fff;font-weight:800;font-size:15px;padding:12px 22px;border-radius:999px;z-index:60;box-shadow:0 8px 20px rgba(0,0,0,.2);animation:pop .2s ease}
 .go{cursor:pointer}
 body.yearmode #grid,body.yearmode .legend{display:none}
 body.yearmode .year{margin-top:6px}
@@ -98,7 +101,7 @@ body.searching .sres{display:block}
  main{padding:0 16px 40px}.tabs{overflow-x:auto}.tab{padding:10px 16px 10px 10px}
  .grid{grid-template-columns:1fr 1fr;gap:12px}.body{padding:12px}.body h3{font-size:15px}.goal{display:none}.mhead .view{display:none}
  .year{display:none}.legend{flex-wrap:wrap;gap:8px 14px}.legend span{white-space:nowrap}
- .acts .qr{display:none}
+ .qr.sh{padding:0 10px;font-size:13px}
 }
 </style></head><body>
 <header><div class="hin"><img id="logo" alt="(주)코리아사이언스"><span class="sep"></span><b>항공드론과학 웹 교재</b><small>방과후 수업</small><label class="search">🔍 <input id="q" placeholder="교재·교구 이름으로 찾기" autocomplete="off"></label></div></header>
@@ -108,7 +111,7 @@ body.searching .sres{display:block}
  <div class="mhead"><div><h2 id="mt"></h2><p id="ms"></p></div><div class="view"><span id="vMonth" class="on">달별 보기</span><span id="vYear">연간표</span></div></div>
  <div class="sres" id="sres"></div>
  <div class="grid" id="grid"></div>
- <div class="legend"><span><i style="background:var(--c)"></i>웹 교재</span><span><i style="background:#ff7a3d"></i>교구활용 · 미션</span><span>🔒 달마다 비밀번호를 한 번 입력하면 열려요</span><span>📱 QR을 누르면 학생용 QR 코드가 보여요</span></div>
+ <div class="legend"><span><i style="background:var(--c)"></i>웹 교재</span><span><i style="background:#ff7a3d"></i>교구활용 · 미션</span><span>🔗 공유를 누르면 교재 주소를 보내거나 복사할 수 있어요</span><span>🔒 PPT 파일은 교재 안의 PPT 다운로드 버튼에서 비밀번호를 넣고 받아요</span></div>
  <div class="year"><h4 id="yh"></h4><table id="yt"></table></div>
 </main>
 <div class="mask" id="mask"><div class="modal" id="modal"></div></div>
@@ -131,8 +134,8 @@ let year=false;
 const ALL=D.flatMap((M,mi)=>M.items.map((it,ii)=>({...it,mi,ii})));
 function card(it,showMonth){const M=D[it.mi],tag=showMonth?`<span class="mtag" style="color:${M.color}">${M.short}</span>`:'';
  return it.mission?
-  `<div class="card mission"><div class="thumb">${tag}<span class="wk">${it.w}주차</span><span class="big">🎯</span><span class="lbl">MISSION</span></div><div class="body"><h3>${it.t}</h3><span class="kit">🧩 ${it.kit}</span><p class="goal">${it.goal}</p><div class="acts"><a class="go" data-a="open" data-m="${it.mi}" data-i="${it.ii}">미션 보기</a><span class="qr" data-a="qr" data-m="${it.mi}" data-i="${it.ii}">QR</span></div></div></div>`:
-  `<div class="card" style="--c:${M.color}"><div class="thumb" style="background-image:url(${it.img})">${tag}<span class="wk">${it.w}주차</span></div><div class="body"><h3>${it.t}</h3><span class="kit">🧩 ${it.kit}</span><p class="goal">${it.goal}</p><div class="acts"><a class="go" data-a="open" data-m="${it.mi}" data-i="${it.ii}">▶ 수업 시작</a><span class="qr" data-a="qr" data-m="${it.mi}" data-i="${it.ii}">QR</span></div></div></div>`}
+  `<div class="card mission"><div class="thumb">${tag}<span class="wk">${it.w}주차</span><span class="big">🎯</span><span class="lbl">MISSION</span></div><div class="body"><h3>${it.t}</h3><span class="kit">🧩 ${it.kit}</span><p class="goal">${it.goal}</p><div class="acts"><a class="go" data-a="open" data-m="${it.mi}" data-i="${it.ii}">미션 보기</a><span class="qr sh" data-a="share" data-m="${it.mi}" data-i="${it.ii}" title="공유하기">🔗 공유</span></div></div></div>`:
+  `<div class="card" style="--c:${M.color}"><div class="thumb" style="background-image:url(${it.img})">${tag}<span class="wk">${it.w}주차</span></div><div class="body"><h3>${it.t}</h3><span class="kit">🧩 ${it.kit}</span><p class="goal">${it.goal}</p><div class="acts"><a class="go" data-a="open" data-m="${it.mi}" data-i="${it.ii}">▶ 수업 시작</a><span class="qr sh" data-a="share" data-m="${it.mi}" data-i="${it.ii}" title="공유하기">🔗 공유</span></div></div></div>`}
 function render(){
  const M=D[cur]; document.documentElement.style.setProperty('--c',M.color);
  document.getElementById('tabs').innerHTML=D.map((x,k)=>`<div class="tab ${k===cur?'on':''}" style="--c:${x.color}" data-tab="${k}"><div class="ic">${x.icon}</div><div><div class="m">${x.m}</div><div class="t">${x.theme}</div></div></div>`).join('')+`<div class="tab soon"><div class="ic">＋</div><div><div class="m">다음 달</div><div class="t">준비 중</div></div></div>`;
@@ -155,9 +158,13 @@ mask.addEventListener('click',e=>{if(e.target===mask)closeM()});
 document.addEventListener('keydown',e=>{if(e.key==="Escape")closeM()});
 function doAct(a,mi,ii){const it=D[mi].items[ii];
  if(a==='open') window.open(it.url,'_blank','noopener');
+ else if(a==='share'){const data={title:it.t,text:`${D[mi].m} ${it.w}주차 웹 교재 · ${it.t}`,url:it.url};
+  (async()=>{try{if(navigator.share){await navigator.share(data);return}}catch(_){return}
+   try{await navigator.clipboard.writeText(it.url)}catch(_){const t=document.createElement('textarea');t.value=it.url;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove()}
+   toast('✅ 교재 주소를 복사했어요');})();}
  else{modal.style.setProperty('--c',D[mi].color);modal.innerHTML=`<button class="x" onclick="closeM()">×</button><h3>${it.t}</h3><p>${D[mi].short} ${it.w}주차 · 휴대폰 카메라로 찍으면 바로 열려요</p><img class="qrimg" src="${it.qr}" alt="QR 코드"><div class="url">${it.url}</div>`;mask.classList.add('on');}}
 function ask(a,mi,ii){const M=D[mi];
- if(unlocked[mi]) return doAct(a,mi,ii);
+ return doAct(a,mi,ii);
  modal.style.setProperty('--c',M.color);
  modal.innerHTML=`<button class="x" onclick="closeM()">×</button><div class="lk">🔒</div><h3>${M.m} 교재 비밀번호</h3><p>${M.theme} 교재는 비밀번호가 필요해요.<br>한 번 입력하면 이 창을 닫을 때까지 다시 묻지 않아요.</p><form id="pf"><input id="pw" type="password" placeholder="비밀번호" autocomplete="off"><div class="err" id="err"></div><button class="ok">확인</button></form>`;
  mask.classList.add('on');const pw=document.getElementById('pw');setTimeout(()=>pw.focus(),30);
@@ -169,5 +176,6 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-tab]');if(
 document.getElementById('vMonth').onclick=()=>{year=false;render()};document.getElementById('vYear').onclick=()=>{year=true;render()};
 document.getElementById('q').addEventListener('input',render);
 window.closeM=closeM;
+function toast(m){document.querySelectorAll('.toast').forEach(x=>x.remove());const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2200);}
 render();
 </script></body></html>
