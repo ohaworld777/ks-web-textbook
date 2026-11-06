@@ -150,7 +150,7 @@ let cur=0;{const now=new Date(),key=`${now.getFullYear()}-${now.getMonth()+1}`;c
 let year=false;
 const ALL=D.flatMap((M,mi)=>M.items.map((it,ii)=>({...it,mi,ii})));
 function pairTb(it){if(!it.kitgo)return '';const k=(typeof KITS!=='undefined'&&KITS[it.kitgo])||null;
- return `<div class="pair"><span class="pl">짝꿍 교구</span>${k&&k.url?`<a href="${k.url}" target="_blank" rel="noopener">🛠️ ${it.kitname} 만들기 →</a>`:`<span class="off">🛠️ ${it.kitname} (준비 중)</span>`}</div>`;}
+ return `<div class="pair"><span class="pl">교구 만들기</span>${k&&k.url?`<a href="${k.url}" target="_blank" rel="noopener">🛠️ ${it.kitname} 만들기 →</a>`:`<span class="off">🛠️ ${it.kitname} (준비 중)</span>`}</div>`;}
 function card(it,showMonth){const M=D[it.mi],tag=showMonth?`<span class="mtag" style="color:${M.color}">${M.short}</span>`:'';
  return it.mission?
   `<div class="card mission"><div class="thumb">${tag}<span class="wk">${it.lab||it.w+'주차'}</span><span class="big">🎯</span><span class="lbl">MISSION</span></div><div class="body"><h3>${it.t}</h3><span class="kit">🧩 ${it.kit}</span><p class="goal">${it.goal}</p><div class="acts"><a class="go" data-a="open" data-m="${it.mi}" data-i="${it.ii}">미션 보기</a><span class="qr sh" data-a="share" data-m="${it.mi}" data-i="${it.ii}" title="공유하기">🔗 공유</span></div></div></div>`:
