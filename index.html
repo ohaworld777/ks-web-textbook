@@ -234,7 +234,7 @@ html,body{overflow-x:hidden}
 .kbc .ic{font-size:22px;flex:none}.kbc .tx{flex:1;min-width:0}.kbc .tx b{display:block;font-size:14px;line-height:1.35}.kbc .tx span{display:block;font-size:12px;color:#5d6b86;margin-top:2px}
 .kbc .go{flex:none;border:0;border-radius:10px;padding:8px 11px;font:inherit;font-size:13px;font-weight:900;color:#fff;background:var(--kc,#1c6fd1);cursor:pointer;text-decoration:none;white-space:nowrap}
 .kbc .go.off{background:#c9d3e6;cursor:default}
-.kbg{display:flex;flex-wrap:wrap;gap:6px;align-self:stretch}.kbg button{border:1px solid #c9d3e6;background:#fff;border-radius:10px;padding:7px 10px;font:inherit;font-size:12.5px;font-weight:800;color:#1c6fd1;cursor:pointer}.kbg button:hover{background:#eef4ff}
+.kbg{display:flex;flex-wrap:wrap;gap:6px;align-self:stretch}.kbg button{border:1px solid #c9d3e6;background:#fff;border-radius:10px;padding:7px 10px;font:inherit;font-size:12.5px;font-weight:800;color:#1c6fd1;cursor:pointer}.kbg button:hover{background:#eef4ff}.kbprev button{border-color:#7c4dff;color:#5b2fd6;background:#f5f1ff}
 .kbq{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px 0;background:#fff;border-top:1px solid #e3e9f4}
 .kbq button{border:1px solid #c9d3e6;background:#fff;border-radius:999px;padding:6px 11px;font:inherit;font-size:12.5px;font-weight:800;color:#14213f;cursor:pointer}
 .kbq button:hover{border-color:#1c6fd1;color:#1c6fd1}
@@ -446,10 +446,13 @@ function cards(list){const w=document.createElement('div');w.className='kbr';
  w.querySelectorAll('a.go').forEach(a=>a.addEventListener('click',ev=>{const e=list[+a.dataset.k];if(e.vid&&typeof openVideo==='function'){ev.preventDefault();close();openVideo(e.url,e.t,e.sub);}}));
  L.appendChild(w);L.scrollTop=L.scrollHeight;}
 function linkCard(ic,t,sub,url,btn,fn){const e={ic,t,sub,url,btn,c:'#14213f'};cards([e]);if(fn){const a=L.lastChild.querySelector('a.go');a.addEventListener('click',ev=>{ev.preventDefault();close();fn();});}}
-function gsay(t){const el=say(t);guideChips();setTimeout(()=>el.scrollIntoView({block:'start',behavior:'smooth'}),30);}
+function gsay(t){const el=say(t);guideChips();if(!replaying)setTimeout(()=>el.scrollIntoView({block:'start',behavior:'smooth'}),30);}
 function guideChips(){const w=document.createElement('div');w.className='kbg';w.innerHTML=GUIDE.map(g=>`<button type="button">${g.t}</button>`).join('');w.onclick=e=>{const b=e.target.closest('button');if(b)answer(b.textContent);};L.appendChild(w);L.scrollTop=L.scrollHeight;}
 function answer(q){
- q=q.trim();if(!q)return;say(q,'u');
+ q=q.trim();if(!q)return;
+ if(!replaying&&/이전\s*대화|지난\s*대화|아까\s*(대화|질문|물어)|대화\s*(이어|불러|복원|다시\s*보)/.test(q)){restorePrev();return;}
+ if(!replaying)LOG.push(q);
+ say(q,'u');
  const qq=q.replace(/^[^\w가-힣ㄱ-ㅎ]+/,'');
  const gt=GUIDE.find(g=>g.t===q);if(gt){gsay(gt.a);return;}
  if(/^교재\s*사용법$/.test(qq)||(GUIDE_ALL.test(q)&&!GUIDE.some(g=>g.k.test(q)))){gsay(GUIDE_INTRO);return;}
@@ -481,9 +484,16 @@ function show(r,q){
  cards(res.slice(0,8));
  const top=res[0];if(res.length<=3&&top.type==='tb'){const k=kitD.flatMap(M=>M.items).find(it=>it.kit&&(it.tb||[]).some(x=>x.t===top.t));if(k&&!res.some(e=>e.type==='kit'))say('이 교재와 짝인 교구 「'+k.t.replace(/\s*만들기$/,'')+'」 만들기도 있어요. "'+k.t.replace(/\s*만들기$/,'')+'"라고 물어보세요.');}
 }
-let greeted=false;
-function close(){MK.classList.remove('on');fab.classList.remove('on');}
-function open(){MK.classList.add('on');fab.classList.add('on');if(!greeted){greeted=true;say('안녕하세요! 저는 코리아사이언스 교재 안내 도우미 코리AI예요 😊\n찾고 싶은 교재·교구 이름이나 궁금한 것을 적어 주세요.\n예) "교재 사용법", "스핏파이어", "2월 교재", "쪽 넘기는 법", "게임"');}setTimeout(()=>I.focus(),50);}
+let greeted=false,LOG=[],PREV=[],replaying=false;const PK='kori_prev_chat';
+try{PREV=JSON.parse(localStorage.getItem(PK)||'[]')||[]}catch(_){PREV=[]}
+function close(){MK.classList.remove('on');fab.classList.remove('on');
+ if(LOG.length){PREV=LOG.slice(-30);try{localStorage.setItem(PK,JSON.stringify(PREV))}catch(_){}}
+ LOG=[];L.innerHTML='';greeted=false;}
+function prevBtn(){if(!PREV.length)return;const w=document.createElement('div');w.className='kbg kbprev';w.innerHTML=`<button type="button">↩ 이전 대화 이어 보기 (질문 ${PREV.length}개)</button>`;w.onclick=()=>restorePrev();L.appendChild(w);}
+function restorePrev(){if(!PREV.length){say('불러올 이전 대화가 없어요. 궁금한 것을 새로 물어봐 주세요.');return;}
+ const qs=PREV.slice();L.innerHTML='';replaying=true;say('↩ 이전 대화를 불러왔어요. 이어서 물어보세요.');qs.forEach(q=>answer(q));replaying=false;LOG=qs.slice();
+ setTimeout(()=>{L.scrollTop=L.scrollHeight},40);}
+function open(){MK.classList.add('on');fab.classList.add('on');if(!greeted){greeted=true;say('안녕하세요! 저는 코리아사이언스 교재 안내 도우미 코리AI예요 😊\n찾고 싶은 교재·교구 이름이나 궁금한 것을 적어 주세요.\n예) "교재 사용법", "스핏파이어", "2월 교재", "쪽 넘기는 법", "게임"');prevBtn();}setTimeout(()=>I.focus(),50);}
 fab.onclick=open;P.querySelector('.x').onclick=close;window.addEventListener('keydown',e=>{if(e.key==='Escape'&&MK.classList.contains('on'))close();},true);
 P.querySelector('form').onsubmit=e=>{e.preventDefault();const v=I.value;I.value='';answer(v)};
 Q.addEventListener('click',e=>{const b=e.target.closest('button');if(b)answer(b.textContent)});
