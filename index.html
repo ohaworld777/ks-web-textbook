@@ -441,11 +441,93 @@ const L=P.querySelector('.kbl'),I=P.querySelector('input'),Q=P.querySelector('.k
 const QUICK=['📖 교재 사용법','이번 달 교재','🎮 학습 게임','🛠️ 교구 제작','🎬 교구 영상','🔒 PPT 받는 법','🔗 공유하는 법','🎓 심화학습'];
 Q.innerHTML=QUICK.map(x=>`<button type="button">${x}</button>`).join('');
 function say(t,who){const d=document.createElement('div');d.className='kbm '+(who||'b');d.textContent=t;L.appendChild(d);L.scrollTop=L.scrollHeight;return d}
-function cards(list){const w=document.createElement('div');w.className='kbr';
+function cards(list){LASTCARDS=list;const w=document.createElement('div');w.className='kbr';
  w.innerHTML=list.map((e,k)=>`<div class="kbc" style="--kc:${e.c||'#1c6fd1'}"><span class="ic">${e.ic}</span><div class="tx"><b>${esc(e.t)}</b><span>${esc(e.sub)}</span></div>${e.url?`<a class="go" data-k="${k}" href="${esc(e.url)}" target="_blank" rel="noopener">${e.btn}</a>`:`<span class="go off">준비 중</span>`}</div>`).join('');
  w.querySelectorAll('a.go').forEach(a=>a.addEventListener('click',ev=>{const e=list[+a.dataset.k];if(e.vid&&typeof openVideo==='function'){ev.preventDefault();close();openVideo(e.url,e.t,e.sub);}}));
  L.appendChild(w);L.scrollTop=L.scrollHeight;}
 function linkCard(ic,t,sub,url,btn,fn){const e={ic,t,sub,url,btn,c:'#14213f'};cards([e]);if(fn){const a=L.lastChild.querySelector('a.go');a.addEventListener('click',ev=>{ev.preventDefault();close();fn();});}}
+// ── 자연어 대화(서버·AI 없이 규칙으로) ──
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const jo=(w,a,b)=>{const c=w.replace(/\(.*?\)$/,'').trim().slice(-1).charCodeAt(0)-44032;return w+((c>=0&&c<11172&&c%28)?a:b);};let RAW='';
+const SYN=[[/비번/g,'비밀번호'],[/동영상/g,'영상'],[/쌤|샘(?=님|이|은|$)/g,'선생님'],[/로봇\s*강아지|로봇개|탐사\s*로봇|탐사\s*로버|ai\s*탐사\s*로버/gi,'AI탐사로보'],[/플라이어(?!호)/g,'플라이어호'],[/라이트\s*형제/g,'최초의 동력비행 라이트형제'],[/우주\s*사진/g,'우주의 멋진 사진들'],[/미로\s*구슬|구슬\s*미로/g,'미로찾기 구슬'],[/스핏(?!파이어)/g,'스핏파이어'],[/전투기/g,'스핏파이어 전투기'],[/피피티/g,'PPT']];
+const syn=q=>SYN.reduce((s,[r,t])=>s.replace(r,t),q);
+const TBE=r=>E.find(e=>e.type==='tb'&&e.url&&e.url.includes('/'+r+'/'));
+// 과학 개념 사전(수업 내용 기반) — d: 더 자세히
+const KB=[
+ {k:/양력/,n:'양력',a:'양력은 비행기를 위로 들어 올리는 힘이에요. 날개 윗면을 지나는 공기는 빠르고 압력이 낮고, 아랫면은 상대적으로 압력이 높아서 날개가 위로 밀려 올라가요. 날개를 살짝 들어 올린 각도(받음각)도 양력을 키워요.',d:'양력은 속도가 빠를수록, 날개가 넓을수록, 공기가 진할수록 커져요. 받음각이 너무 커지면 공기 흐름이 날개에서 떨어져 양력이 갑자기 줄어드는데, 이것을 「실속」이라고 해요. 종이비행기 날개 끝을 살짝 올렸다 내렸다 하며 실험해 보면 차이를 느낄 수 있어요.',r:'aircraft-balance-control'},
+ {k:/항력|공기\s*저항/,n:'항력',a:'항력은 앞으로 나아가는 물체를 뒤로 잡아당기는 공기의 저항이에요. 바람 부는 날 우산을 펴고 걸으면 뒤로 밀리는 느낌이 바로 항력이에요.',d:'유선형(물방울 모양)으로 만들면 공기가 매끄럽게 흘러가서 항력이 줄어요. 상어·새·비행기 동체가 매끈한 이유예요. 속도가 2배가 되면 항력은 약 4배로 커져요.',r:'aircraft-balance-control'},
+ {k:/추력/,n:'추력',a:'추력은 비행기를 앞으로 밀어 주는 힘이에요. 프로펠러가 공기를 뒤로 밀거나, 제트엔진이 가스를 뒤로 뿜으면 그 반작용으로 비행기가 앞으로 나아가요(작용·반작용).',d:'풍선에 바람을 넣었다 놓으면 공기가 뒤로 나가면서 풍선이 앞으로 날아가는 것과 같은 원리예요. 스핏파이어 교구는 충전식 전동 프로펠러가 추력을 만들어요.',r:'flight-innovation-era'},
+ {k:/중력|무게/,n:'중력',a:'중력은 지구가 모든 물체를 아래로 끌어당기는 힘이에요. 비행기가 날려면 양력이 중력(무게)보다 커야 해요.',d:'비행기에는 양력(위)·중력(아래)·추력(앞)·항력(뒤) 네 가지 힘이 함께 작용해요. 위아래 힘이 같고 앞뒤 힘이 같으면 같은 높이·같은 속도로 날아가요.',r:'aircraft-balance-control'},
+ {k:/(네|4)\s*가지\s*힘|비행.*힘|힘.*비행|비행기.{0,6}(어떻게|왜).{0,4}(날|뜨)|어떻게\s*(날아|떠|뜰)/,n:'비행기에 작용하는 4가지 힘',a:'비행기에는 네 가지 힘이 작용해요.\n · 양력(위): 날개가 만드는 힘\n · 중력(아래): 무게\n · 추력(앞): 프로펠러·엔진이 미는 힘\n · 항력(뒤): 공기 저항\n양력>중력이면 올라가고, 추력>항력이면 빨라져요.',r:'aircraft-balance-control'},
+ {k:/베르누이/,n:'베르누이 원리',a:'베르누이 원리는 "공기(유체)가 빠르게 흐르는 곳은 압력이 낮아진다"는 원리예요. 종이 두 장 사이로 바람을 불면 종이가 서로 붙는 것도 이 때문이에요.',d:'비행기 날개 윗면은 공기가 빨리 흘러 압력이 낮아지고, 그 압력 차이가 양력의 한 부분을 만들어요. 실제 양력은 받음각으로 공기를 아래로 밀어내는 효과도 함께 작용해요.',r:'aircraft-balance-control'},
+ {k:/받음각/,n:'받음각',a:'받음각은 날개가 다가오는 바람과 이루는 각도예요. 조금 크게 하면 양력이 커지지만, 너무 크면 공기 흐름이 떨어져 「실속」이 일어나요.',r:'aircraft-balance-control'},
+ {k:/실속/,n:'실속',a:'실속은 받음각이 너무 커져서 날개 위 공기 흐름이 떨어지고 양력이 갑자기 줄어드는 현상이에요. 그래서 조종사는 속도와 기수 각도를 함께 조절해요.',r:'aircraft-balance-control'},
+ {k:/에일러론|보조\s*날개|롤|기울/,n:'에일러론(롤)',a:'에일러론은 주날개 끝에 있는 움직이는 날개예요. 한쪽은 올라가고 반대쪽은 내려가서 비행기를 좌우로 기울게 해요(롤). 방향을 틀 때 먼저 기울여요.',r:'aircraft-balance-control'},
+ {k:/엘리베이터|승강타|피치|기수/,n:'엘리베이터(피치)',a:'엘리베이터는 꼬리날개 수평 부분에 있는 움직이는 판이에요. 위로 올리면 기수가 들리고(상승), 내리면 기수가 숙여져요(하강). 이 움직임을 피치라고 해요.',r:'aircraft-balance-control'},
+ {k:/러더|방향타|요잉/,n:'러더(요)',a:'러더는 수직 꼬리날개에 있는 방향타예요. 좌우로 움직여 비행기 코를 왼쪽·오른쪽으로 돌려요(요).',r:'aircraft-balance-control'},
+ {k:/수평|균형|무게\s*중심|조종\s*원리|3\s*축|세\s*축/,n:'수평과 균형 조종',a:'비행기는 세 축으로 움직여요.\n · 롤(좌우 기울기): 에일러론\n · 피치(기수 위아래): 엘리베이터\n · 요(코 좌우 방향): 러더\n그리고 무게중심이 날개 근처 알맞은 곳에 있어야 안정적으로 날아요. 1월 미로찾기 구슬 교구로 수평 잡기를 체험해요.',r:'aircraft-balance-control'},
+ {k:/우주.{0,8}소리|소리.{0,8}우주/,n:'우주와 소리',a:'우주에서는 소리가 들리지 않아요. 소리는 공기 같은 물질(매질)이 떨려야 전달되는데, 우주는 거의 텅 빈 진공이라 떨려 줄 물질이 없기 때문이에요. 그래서 우주비행사들은 무전기(전파)로 대화해요.',r:'sound-ai-sensor'},
+ {k:/꼬리\s*날개|수직\s*날개|수평\s*꼬리/,n:'꼬리날개',a:'꼬리날개는 비행기가 흔들리지 않고 똑바로 날게 해 주는 날개예요.\n · 수평 꼬리날개: 기수가 위아래로 출렁이지 않게 잡아 주고, 엘리베이터로 오르내림을 조종해요.\n · 수직 꼬리날개: 좌우로 미끄러지지 않게 잡아 주고, 러더로 방향을 바꿔요.\n화살 끝의 깃털이 화살을 똑바로 날게 하는 것과 비슷해요.',r:'aircraft-balance-control'},
+ {k:/주\s*날개|날개.{0,6}(역할|모양|원리)/,n:'날개',a:'주날개는 양력을 만들어 비행기를 띄우는 가장 중요한 부분이에요. 윗면은 둥글고 아랫면은 평평한 모양(에어포일)이 많고, 날개 끝의 에일러론으로 좌우 기울기를 조종해요.',r:'aircraft-balance-control'},
+ {k:/글라이더/,n:'글라이더',a:'글라이더는 엔진 없이 나는 비행기예요. 높은 곳에서 출발하거나 끌려 올라간 뒤, 넓은 날개로 양력을 받으며 천천히 미끄러지듯 내려와요. 따뜻한 공기가 올라가는 곳(상승기류)을 타면 더 오래 날 수 있어요.'},
+ {k:/헬리콥터|헬기/,n:'헬리콥터',a:'헬리콥터는 머리 위의 큰 날개(로터)가 돌면서 양력을 만들어 수직으로 뜨고 내려요. 꼬리의 작은 프로펠러는 몸체가 로터 반대 방향으로 빙글빙글 도는 것을 막아 줘요.'},
+ {k:/로켓/,n:'로켓',a:'로켓은 연료와 산소를 함께 싣고 태워서 뜨거운 가스를 아래로 세게 뿜고, 그 반작용으로 위로 올라가요. 공기가 없는 우주에서도 날 수 있는 이유는 산소를 직접 싣고 가기 때문이에요.'},
+ {k:/라이트|최초.*(비행|동력)|1903|키티\s*호크/,n:'라이트 형제와 최초의 동력비행',a:'1903년 12월 17일, 미국 키티호크에서 라이트 형제의 플라이어호가 사람이 조종하는 최초의 동력비행에 성공했어요. 첫 비행은 약 12초 동안 약 36m를 날았어요.',d:'라이트 형제는 자전거 가게를 운영하며 풍동(바람 터널)을 직접 만들어 날개 모양을 수백 번 실험했어요. 날개를 비틀어 좌우 균형을 잡는 「날개 비틀기」 방법을 생각해 낸 것이 성공의 열쇠였어요. 같은 날 네 번째 비행에서는 59초 동안 약 260m를 날았어요.',r:'first-powered-flight'},
+ {k:/스핏파이어|spitfire/i,n:'스핏파이어',a:'스핏파이어는 영국 슈퍼마린사가 만든 전투기로 1936년 처음 날았어요. 2차 세계대전 때 영국 본토 항공전(1940년)에서 활약했고, 아름다운 타원형 날개로 유명해요.',d:'타원형 날개는 날개 끝에서 생기는 소용돌이(유도항력)를 줄여 효율이 좋고 얇게 만들 수 있었어요. 코리아사이언스 스핏파이어 교구는 충전식 전동 프로펠러로 나는 비행기예요.',r:'flight-innovation-era'},
+ {k:/프로펠러/,n:'프로펠러',a:'프로펠러는 비틀린 날개가 돌면서 공기를 뒤로 밀어 추력을 만드는 장치예요. 날개 하나하나가 작은 비행기 날개처럼 양력을 앞쪽으로 만든다고 생각하면 돼요.',r:'flight-innovation-era'},
+ {k:/제트\s*엔진|제트기/,n:'제트엔진',a:'제트엔진은 공기를 빨아들여 압축하고, 연료와 함께 태워 뜨거운 가스를 뒤로 세게 뿜어 그 반작용으로 앞으로 나아가요. 프로펠러보다 훨씬 빠르게 날 수 있어요.',r:'flight-innovation-era'},
+ {k:/드론|쿼드\s*콥터|멀티\s*콥터/,n:'드론',a:'드론은 사람이 타지 않고 원격이나 자동으로 나는 비행체예요. 프로펠러 4개짜리(쿼드콥터)는 이웃한 프로펠러끼리 반대 방향으로 돌아 몸체가 빙글빙글 돌지 않게 하고, 각 모터 속도를 바꿔 앞뒤·좌우로 움직여요.',d:'드론은 자이로 센서로 기울기를, 기압 센서로 높이를, GPS로 위치를 알아내요. 촬영·택배·농약 살포·재난 구조 등에 쓰여요.'},
+ {k:/오감|다섯\s*가지\s*감각|감각/,n:'사람의 감각',a:'사람에게는 다섯 가지 감각(오감)이 있어요: 시각(눈)·청각(귀)·후각(코)·미각(혀)·촉각(피부). 감각 기관이 받은 정보는 신경을 통해 뇌로 전달돼요.',d:'로봇은 오감 대신 센서를 써요. 눈 → 카메라·빛 센서, 귀 → 마이크·소리 센서, 피부 → 터치·압력 센서, 코 → 가스 센서처럼 짝지어 볼 수 있어요.',r:'human-robot-senses'},
+ {k:/센서/,n:'센서',a:'센서는 빛·소리·온도·거리·움직임 같은 바깥 정보를 감지해서 전기 신호로 바꿔 주는 부품이에요. 로봇의 감각 기관이라고 할 수 있어요.',d:'예) 초음파 센서는 소리를 쏘고 되돌아오는 시간으로 거리를 재요. 적외선 센서는 눈에 보이지 않는 빛으로 물체를 감지하고, 소리 센서는 소리 크기를, 터치 센서는 닿았는지를 알아내요.',r:'sound-sensors-around-us'},
+ {k:/소리.*(원리|어떻게|생기|전달)|진동|음파|파동/,n:'소리의 원리',a:'소리는 물체가 떨리는(진동) 것에서 생겨요. 그 떨림이 공기 같은 물질(매질)을 타고 파동으로 퍼져 우리 귀에 전달돼요. 공기 중에서 소리는 1초에 약 340m를 가요.',d:'소리의 크기는 떨림의 폭(진폭)이 클수록 커지고, 소리의 높낮이는 1초에 떨리는 횟수(진동수, Hz)가 많을수록 높아져요. 우주는 공기가 없어서 소리가 전달되지 않아요.',r:'sound-ai-sensor'},
+ {k:/진폭|진동수|높낮이|헤르츠|hz/i,n:'소리의 크기와 높낮이',a:'소리 크기는 진폭(떨림의 폭)이, 소리 높낮이는 진동수(1초에 떨리는 횟수, Hz)가 정해요. 사람은 대략 20Hz~20,000Hz의 소리를 들을 수 있어요.',r:'sound-ai-sensor'},
+ {k:/데시벨|db\b/i,n:'데시벨',a:'데시벨(dB)은 소리의 세기를 나타내는 단위예요. 속삭임은 약 30dB, 보통 대화는 약 60dB, 지하철은 약 80~90dB 정도예요. 85dB 이상을 오래 들으면 귀가 상할 수 있어요.',r:'sound-sensors-around-us'},
+ {k:/초음파/,n:'초음파',a:'초음파는 사람이 들을 수 없을 만큼 높은(약 20,000Hz 이상) 소리예요. 박쥐·돌고래가 위치를 찾을 때 쓰고, 자동차 후방 감지기·병원 초음파 검사·거리 센서에도 쓰여요.',r:'sound-sensors-around-us'},
+ {k:/음성\s*인식|말로|목소리.*인식/,n:'음성인식',a:'음성인식은 기계가 사람의 말소리를 듣고 무슨 말인지 알아내는 기술이에요. 마이크로 소리를 받아 → 소리 모양(파형)을 분석하고 → 미리 배운 말과 비교해 명령을 알아들어요. AI탐사로보 로봇개도 "앉아", "발사" 같은 말을 알아들어요.',d:'음성인식은 주변 소음이 크거나 발음이 다르면 틀릴 수 있어요. 그래서 많은 사람의 목소리 데이터로 학습시켜 정확도를 높여요. 스마트 스피커·휴대폰 음성비서·자동차 음성 명령에도 쓰여요.',r:'sound-ai-sensor'},
+ {k:/인공\s*지능|\bai\b|머신\s*러닝|기계\s*학습|딥\s*러닝/i,n:'인공지능(AI)',a:'인공지능(AI)은 사람처럼 보고·듣고·판단하도록 만든 컴퓨터 기술이에요. 많은 예시 데이터를 보고 스스로 규칙을 찾아내는 「기계 학습」으로 똑똑해져요.',d:'예) 고양이 사진 수천 장을 보여 주면 AI가 고양이의 특징을 스스로 익혀 새 사진에서도 고양이를 알아봐요. 음성인식·번역·자율주행·추천 서비스가 모두 AI를 써요. 다만 AI도 틀릴 수 있어서 사람이 확인하는 것이 중요해요.',r:'sound-ai-sensor'},
+ {k:/로봇/,n:'로봇',a:'로봇은 센서로 주변을 감지하고(감지) → 컴퓨터로 판단해서(판단) → 모터 등으로 움직이는(행동) 기계예요. 이 세 단계가 사람의 감각·뇌·근육과 비슷해요.',r:'human-robot-senses'},
+ {k:/제임스\s*웹|웹\s*망원경|jwst/i,n:'제임스 웹 우주망원경',a:'제임스 웹 우주망원경은 2021년 12월 25일에 발사된 역사상 가장 큰 우주망원경이에요. 지름 6.5m 금빛 거울로 적외선을 관측해서 아주 먼 우주의 첫 별과 은하를 찍어요.',r:'amazing-space-photos'},
+ {k:/허블/,n:'허블 우주망원경',a:'허블 우주망원경은 1990년에 발사되어 지구 둘레를 돌며 우주를 찍어 온 망원경이에요. 대기가 없는 우주에서 찍어서 선명한 은하·성운 사진을 많이 남겼어요.',r:'amazing-space-photos'},
+ {k:/블랙\s*홀/,n:'블랙홀',a:'블랙홀은 중력이 너무 강해서 빛조차 빠져나올 수 없는 천체예요. 2019년 전 세계 전파망원경을 연결한 「사건의 지평선 망원경」이 처음으로 블랙홀(M87 은하 중심)의 그림자를 찍었어요.',r:'amazing-space-photos'},
+ {k:/은하|성운|별|우주/,n:'우주',a:'우주에는 수천억 개의 은하가 있고, 은하마다 수천억 개의 별이 있어요. 성운은 가스와 먼지가 모인 구름으로, 그 안에서 새로운 별이 태어나요. 우리 은하의 이름은 「우리은하」예요.',r:'amazing-space-photos'}
+];
+const SMALL=[
+ {k:/^(안녕|하이|헬로|hello|hi|ㅎㅇ|반가워|반갑습니다|안녕하세요|좋은\s*(아침|오후|저녁))/i,a:()=>pick(['안녕하세요! 코리AI예요 😊 오늘은 어떤 수업을 준비하세요?','반가워요! 교재·교구 찾기나 사용법, 과학 개념 질문 모두 도와드릴게요.','안녕하세요, 선생님! 무엇을 도와드릴까요? 예) "양력이 뭐야?", "2월 교재", "쪽 넘기는 법"'])},
+ {k:/(잘\s*가|안녕히|다음에\s*봐|bye|바이|수고)/i,a:()=>pick(['수업 잘 하세요! 필요할 때 또 불러 주세요 👋','수고 많으셨어요! 언제든 다시 찾아 주세요 😊'])},
+ {k:/(고마워|고맙|감사|땡큐|thank|ㄱㅅ|덕분)/i,a:()=>pick(['천만에요! 또 궁금한 게 있으면 언제든 물어보세요 🙌','도움이 돼서 기뻐요 😊','별말씀을요! 즐거운 수업 되세요.'])},
+ {k:/(잘\s*지내|기분\s*어때|어떻게\s*지내|뭐\s*해|뭐하)/,a:()=>pick(['저는 언제나 선생님 질문을 기다리고 있어요 😊 오늘 수업 준비는 잘 되고 있나요?','덕분에 잘 지내요! 오늘은 어떤 교재를 보실 건가요?'])},
+ {k:/(너|넌|코리\s*ai|코리)\s*(이름|누구|뭐야|정체)|이름이\s*뭐|누구세요|누구야/i,a:()=>'저는 코리AI예요! 코리아사이언스 항공드론과학 웹 교재 안내 도우미랍니다.\n교재·교구·게임·영상 찾기, 사용법 안내, 수업에 나오는 과학 개념 설명을 도와드려요.'},
+ {k:/(누가|어디서)\s*(만들|개발)/,a:()=>'저는 코리아사이언스가 선생님들의 수업을 돕기 위해 만든 안내 도우미예요 🤖'},
+ {k:/(뭘|무엇을|뭐)\s*(할\s*수|도와|해\s*줄\s*수)|기능|할\s*줄\s*아/,a:()=>'제가 도와드릴 수 있는 일이에요.\n · 교재·교구·게임·영상 찾기 (예: "스핏파이어", "1월 교재")\n · 교재 사용법 (예: "쪽 넘기는 법", "슬라이드 쇼")\n · 수업 과학 개념 설명 (예: "양력이 뭐야?", "음성인식 원리")\n · 자료지원실·고객센터 안내'},
+ {k:/(똑똑|최고|잘했|대단|멋지|귀여|착하|좋아해)/,a:()=>pick(['칭찬 고마워요! 더 열심히 도와드릴게요 😊','헤헤, 기분 좋아요! 또 궁금한 거 있으세요?'])},
+ {k:/(바보|멍청|별로|짜증|답답|못\s*알아|이상해|엉뚱)/,a:()=>'답답하게 해 드려서 죄송해요 🙏 조금 다르게 물어봐 주시면 더 잘 찾아볼게요.\n예) 교재 이름(「비행혁신시대」), 교구 이름(「스핏파이어」), 궁금한 개념(「양력」)처럼 짧게 적어 주시면 좋아요.\n그래도 안 되면 고객센터 051-514-0777로 연락 주세요.'},
+ {k:/(심심|재밌는\s*거|농담|웃긴|유머)/,a:()=>pick(['비행기가 제일 좋아하는 음식은? 「날」개 달린 치킨이에요 🐔✈️ … 수업 이야기로 돌아가 볼까요?','퀴즈! 소리는 우주에서 들릴까요? 정답은 「아니요」! 공기가 없어서 소리가 전달되지 않아요 🚀','재미있는 사실! 라이트 형제의 첫 비행 거리(약 36m)는 지금의 대형 여객기 날개 길이보다도 짧아요 ✈️'])},
+ {k:/(몇\s*시|시간|오늘\s*(며칠|날짜)|무슨\s*요일|오늘\s*몇\s*일)/,a:()=>{const d=new Date();return `지금은 ${d.getMonth()+1}월 ${d.getDate()}일 ${'일월화수목금토'[d.getDay()]}요일, ${d.getHours()}시 ${d.getMinutes()}분이에요.`}},
+ {k:/날씨/,a:()=>'저는 날씨는 알 수 없어요 🌤️ 대신 비행기가 바람 부는 날 왜 흔들리는지는 알려 드릴 수 있어요! "항력"이나 "양력"을 물어보세요.'},
+ {k:/^(응|네|예|그래|좋아|ㅇㅇ|오케이|ok|알겠|알았)/i,a:()=>'좋아요! 궁금한 것을 이어서 적어 주세요 😊'},
+ {k:/^(아니|아뇨|ㄴㄴ|싫어|됐어)/,a:()=>'알겠어요! 다른 게 필요하면 언제든 말씀해 주세요.'},
+ {k:/^(ㅋ+|ㅎ+|하하+|헤헤|크크)+$/,a:()=>pick(['😄 즐거우시다니 저도 기뻐요!','ㅎㅎ 궁금한 거 생기면 편하게 물어보세요!'])}
+];
+let LASTC=null,LASTCARDS=[],LASTR=null,LASTOFF=0;
+const ASK=/뭐야|뭔가요|무엇|뭐예요|뭐에요|뭐지|란\s*\??$|이란|원리|설명|알려|궁금|왜|어떻게|이유|차이|뜻|의미|정의|\?$/;
+function concept(q){const n=q.replace(/\s/g,'').toLowerCase();let best=null;KB.forEach((c,ix)=>{const m=q.match(c.k)||n.match(c.k);if(m){const sc=m[0].length+(ix<KB.length-3?1:0);if(!best||sc>best.sc)best={c,sc};}});return best&&best.c;}
+function sayConcept(c,more){say((more?'【'+c.n+' · 더 자세히】\n'+(c.d||c.a):'【'+c.n+'】\n'+c.a)+(c.d&&!more?'\n\n💬 "더 자세히"라고 하면 더 알려 드려요.':''));
+ if(c.r){const e=TBE(c.r);if(e){say('📘 이 내용은 「'+e.t+'」 교재에서 배워요.');cards([e]);}}LASTC=c;}
+function nlp(q){
+ const t=q.trim(),n=t.replace(/[?!.~\s]/g,'');
+ // 이어지는 대화(맥락)
+ if(/^(더\s*자세히|자세히|더\s*알려|좀\s*더|더\s*설명|구체적으로|예시|예를\s*들)/.test(t)&&LASTC){sayConcept(LASTC,true);return true;}
+ if(/^(그거|그것|첫\s*번째|1번|거기)?\s*(열어|들어가|보여|틀어|켜)/.test(t)&&LASTCARDS.length){const e=LASTCARDS[0];if(e.url){say('「'+e.t+'」을(를) 열게요!');if(e.vid&&typeof openVideo==='function'){close();openVideo(e.url,e.t,e.sub);}else window.open(e.url,'_blank','noopener');return true;}}
+ if(/^(다른\s*거|또|더\s*있|더\s*보여|나머지)/.test(t)&&LASTR&&LASTR.res.length>LASTOFF+8){LASTOFF+=8;say('더 찾은 결과예요.');cards(LASTR.res.slice(LASTOFF,LASTOFF+8));return true;}
+ // 짧은 일상 대화(내용어가 거의 없을 때)
+ if(n.length<=14||!tokens(t).length){const s=SMALL.find(x=>x.k.test(t));if(s){say(s.a());return true;}}
+ // 과학 개념 질문
+ const c=concept(t);
+ if(c&&(ASK.test(t)||!find(t).res.length)){sayConcept(c,false);return true;}
+ return false;
+}
+function suggest(q){const n=N(q);const pool=[...E.map(e=>e.t),...KB.map(c=>c.n),...GUIDE.map(g=>g.t)];const sc=pool.map(t=>[sim(n,N(t))+(cho(t).includes(cho(q).replace(/\s/g,'').slice(0,2))?0.05:0),t]).filter(x=>x[0]>0.2).sort((a,b)=>b[0]-a[0]);return [...new Set(sc.map(x=>x[1]))].slice(0,4);}
+
 function gsay(t){const el=say(t);guideChips();if(!replaying)setTimeout(()=>el.scrollIntoView({block:'start',behavior:'smooth'}),30);}
 function guideChips(){const w=document.createElement('div');w.className='kbg';w.innerHTML=GUIDE.map(g=>`<button type="button">${g.t}</button>`).join('');w.onclick=e=>{const b=e.target.closest('button');if(b)answer(b.textContent);};L.appendChild(w);L.scrollTop=L.scrollHeight;}
 function answer(q){
@@ -453,6 +535,8 @@ function answer(q){
  if(!replaying&&/이전\s*대화|지난\s*대화|아까\s*(대화|질문|물어)|대화\s*(이어|불러|복원|다시\s*보)/.test(q)){restorePrev();return;}
  if(!replaying)LOG.push(q);
  say(q,'u');
+ RAW=q;q=syn(q);
+ if(nlp(q))return;
  const qq=q.replace(/^[^\w가-힣ㄱ-ㅎ]+/,'');
  const gt=GUIDE.find(g=>g.t===q);if(gt){gsay(gt.a);return;}
  if(/^교재\s*사용법$/.test(qq)||(GUIDE_ALL.test(q)&&!GUIDE.some(g=>g.k.test(q)))){gsay(GUIDE_INTRO);return;}
@@ -477,12 +561,16 @@ function answer(q){
 function show(r,q){
  const {res,mk,want}=r;
  if(mk==='none'){say('그 달 교재는 아직 준비 중이에요. 지금은 '+months.map(M=>M.m+'('+M.theme+')').join(', ')+' 교재가 있어요.');return;}
- if(!res.length){say('"'+q+'"에 맞는 교재·교구를 찾지 못했어요 🥲\n교재 제목, 교구 이름(예: 스핏파이어, AI탐사로보), 달(1월·2월)로 물어봐 주세요. 아래 버튼을 눌러도 돼요.');return;}
+ LASTR=r;LASTOFF=0;
+ if(!res.length){const sg=suggest(q);
+  if(sg.length){say(pick(['음… 정확히 맞는 걸 찾지 못했어요. 혹시 이걸 찾으셨나요? 👇','제가 잘 이해했는지 모르겠어요. 아래 중에 있을까요? 👇']));const w=document.createElement('div');w.className='kbg';w.innerHTML=sg.map(t=>`<button type="button">${esc(t)}</button>`).join('');w.onclick=e=>{const b=e.target.closest('button');if(b)answer(b.textContent);};L.appendChild(w);L.scrollTop=L.scrollHeight;return;}
+  say(pick(['죄송해요, 그건 아직 잘 모르겠어요 🥲','그 질문은 제가 아직 배우지 못했어요 🥲'])+'\n이렇게 물어보시면 잘 찾아요.\n · 교재·교구 이름: "스핏파이어", "비행혁신시대"\n · 달: "2월 교재"\n · 사용법: "쪽 넘기는 법", "PPT 받기"\n · 과학 개념: "양력이 뭐야?", "음성인식 원리"\n그래도 어려우면 고객센터 051-514-0777로 연락 주세요.');return;}
  const M=mk&&months.find(x=>x.key===mk);
  const lab={tb:'수업 교재',kit:'교구 제작',game:'학습 게임',video:'교구 영상'}[want]||'';
  say(M?`${M.m} · ${M.theme}${lab?' '+lab:''} ${Math.min(res.length,8)}개를 찾았어요.`:res.length===1?'이걸 찾았어요!':`${Math.min(res.length,8)}개를 찾았어요. 버튼을 누르면 바로 열려요.`);
- cards(res.slice(0,8));
- const top=res[0];if(res.length<=3&&top.type==='tb'){const k=kitD.flatMap(M=>M.items).find(it=>it.kit&&(it.tb||[]).some(x=>x.t===top.t));if(k&&!res.some(e=>e.type==='kit'))say('이 교재와 짝인 교구 「'+k.t.replace(/\s*만들기$/,'')+'」 만들기도 있어요. "'+k.t.replace(/\s*만들기$/,'')+'"라고 물어보세요.');}
+ cards(res.slice(0,8));if(res.length>8)say('결과가 더 있어요. "더 보여줘"라고 하면 이어서 보여 드려요.');
+ {const c=concept(RAW);if(c)say('💡 "'+jo(c.n,'이','가')+' 뭐야?"라고 물으면 개념도 설명해 드려요.');}
+ const top=res[0];if(res.length<=3&&top.type==='tb'){const k=kitD.flatMap(M=>M.items).find(it=>it.kit&&(it.tb||[]).some(x=>x.t===top.t));if(k&&!res.some(e=>e.type==='kit'))say('이 교재와 짝인 교구 「'+k.t.replace(/\s*만들기$/,'')+'」 만들기도 있어요. "'+k.t.replace(/\s*만들기$/,'')+'"'+(/[가-힣]/.test(k.t.slice(-1))&&((k.t.slice(-1).charCodeAt(0)-44032)%28)?'이라고':'라고')+' 물어보세요.');}
 }
 let greeted=false,LOG=[],PREV=[],replaying=false;const PK='kori_prev_chat';
 try{PREV=JSON.parse(localStorage.getItem(PK)||'[]')||[]}catch(_){PREV=[]}
@@ -493,7 +581,7 @@ function prevBtn(){if(!PREV.length)return;const w=document.createElement('div');
 function restorePrev(){if(!PREV.length){say('불러올 이전 대화가 없어요. 궁금한 것을 새로 물어봐 주세요.');return;}
  const qs=PREV.slice();L.innerHTML='';replaying=true;say('↩ 이전 대화를 불러왔어요. 이어서 물어보세요.');qs.forEach(q=>answer(q));replaying=false;LOG=qs.slice();
  setTimeout(()=>{L.scrollTop=L.scrollHeight},40);}
-function open(){MK.classList.add('on');fab.classList.add('on');if(!greeted){greeted=true;say('안녕하세요! 저는 코리아사이언스 교재 안내 도우미 코리AI예요 😊\n찾고 싶은 교재·교구 이름이나 궁금한 것을 적어 주세요.\n예) "교재 사용법", "스핏파이어", "2월 교재", "쪽 넘기는 법", "게임"');prevBtn();}setTimeout(()=>I.focus(),50);}
+function open(){MK.classList.add('on');fab.classList.add('on');if(!greeted){greeted=true;say('안녕하세요! 저는 코리아사이언스 교재 안내 도우미 코리AI예요 😊\n찾고 싶은 교재·교구 이름이나 궁금한 것을 적어 주세요.\n예) "교재 사용법", "스핏파이어", "2월 교재", "양력이 뭐야?", "쪽 넘기는 법"');prevBtn();}setTimeout(()=>I.focus(),50);}
 fab.onclick=open;P.querySelector('.x').onclick=close;window.addEventListener('keydown',e=>{if(e.key==='Escape'&&MK.classList.contains('on'))close();},true);
 P.querySelector('form').onsubmit=e=>{e.preventDefault();const v=I.value;I.value='';answer(v)};
 Q.addEventListener('click',e=>{const b=e.target.closest('button');if(b)answer(b.textContent)});
