@@ -130,10 +130,12 @@ body.gamemode #grid,body.gamemode .legend,body.gamemode .year,body.gamemode .vie
 .games{margin-top:6px}
 .gm{font-size:17px;margin:14px 2px 0;color:var(--muted)}.gm em{font-style:normal;color:var(--c);font-weight:900}
 .mright{display:flex;align-items:center;gap:10px;flex:none}
+.gwrap{display:flex;flex-direction:column;align-items:center;gap:4px}
+.gsub{font-size:12px;font-weight:800;color:#c4501f;white-space:nowrap}
 .gbtn{border:0;border-radius:999px;padding:11px 18px;font:inherit;font-size:15px;font-weight:900;color:#2a1600;background:linear-gradient(135deg,#ffd166,#ff8a3d);box-shadow:0 6px 16px rgba(255,122,61,.35);cursor:pointer;white-space:nowrap}
 .gbtn:hover{transform:translateY(-1px)}
 body.gamemode .gbtn{background:var(--ink);color:#fff;box-shadow:none}
-@media (max-width:760px){.mhead{align-items:center}.gbtn{padding:10px 14px;font-size:14px}}
+@media (max-width:760px){.mhead{align-items:center}.gbtn{padding:10px 14px;font-size:14px}.gsub{font-size:11px}}
 @media (max-width:760px){.gcard{grid-template-columns:1fr}.gcard .gimg{aspect-ratio:16/9}.gcard .gimg:after{background:linear-gradient(180deg,rgba(15,21,48,0) 60%,rgba(15,21,48,1) 100%)}.gcard .gbody{padding:14px 18px 20px}.gcard h3{font-size:22px}.gplay{font-size:16px;padding:11px 20px}}
 /* modal */
 .mask{position:fixed;inset:0;background:rgba(10,18,40,.55);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
@@ -169,7 +171,7 @@ html,body{overflow-x:hidden}
 <section class="hero"><div class="heroin"><span class="kicker">2027 CURRICULUM</span><h1>이번 달 <span>웹 교재</span>로 수업을 시작해요</h1><p>달을 고르고, 카드를 누르면 바로 교재가 열립니다.</p></div></section>
 <main>
  <div class="tabs" id="tabs"></div>
- <div class="mhead"><div><h2 id="mt"></h2><p id="ms"></p></div><div class="mright"><button class="gbtn" id="gameTab" type="button">🎮 학습 게임</button><div class="view"><span id="vMonth" class="on">달별 보기</span><span id="vYear">연간표</span></div></div></div>
+ <div class="mhead"><div><h2 id="mt"></h2><p id="ms"></p></div><div class="mright"><div class="gwrap"><button class="gbtn" id="gameTab" type="button">🎮 학습 게임</button><span class="gsub" id="gameSub">게임으로 배워요</span></div><div class="view"><span id="vMonth" class="on">달별 보기</span><span id="vYear">연간표</span></div></div></div>
  <div class="sres" id="sres"></div>
  <div class="grid" id="grid"></div>
  <section class="games" id="games"></section>
@@ -215,7 +217,7 @@ function render(){
  document.getElementById('tabs').innerHTML=D.map((x,k)=>`<div class="tab ${k===cur&&!gameMode&&!year?'on':''}" style="--c:${x.color}" data-tab="${k}"><div class="ic">${x.icon}</div><div><div class="m">${x.m}</div><div class="t">${x.theme}</div></div></div>`).join('')+`<div class="tab soon"><div class="ic">＋</div><div><div class="m">다음 달</div><div class="t">준비 중</div></div></div>`;
  document.getElementById('mt').innerHTML=gameMode?`🎮 <em>학습 게임</em>`:year?`📅 <em>연간표</em>`:`${M.short} · <em>${M.theme}</em>`;
  document.getElementById('ms').textContent=gameMode?'수업에서 배운 내용으로 하는 게임이에요 · 게임 하기를 누르면 바로 열려요':year?'교재 이름을 누르면 바로 열려요':M.sub+' · 교재 '+M.items.length+'개';
- document.body.classList.toggle('gamemode',gameMode);document.getElementById('gameTab').textContent=gameMode?'← 교재로 돌아가기':'🎮 학습 게임';
+ document.body.classList.toggle('gamemode',gameMode);document.getElementById('gameTab').textContent=gameMode?'← 교재로 돌아가기':'🎮 학습 게임';document.getElementById('gameSub').textContent=gameMode?'수업 화면으로':'게임으로 배워요';
  document.body.classList.toggle('yearmode',year);
  document.getElementById('vMonth').classList.toggle('on',!year);document.getElementById('vYear').classList.toggle('on',year);
  const q=document.getElementById('q').value.trim();
