@@ -196,12 +196,14 @@ html,body{overflow-x:hidden}
 .kbf{position:fixed;right:22px;bottom:22px;z-index:45;display:flex;align-items:center;gap:8px;border:0;cursor:pointer;font:inherit;font-weight:900;font-size:15px;color:#fff;background:linear-gradient(135deg,#1c6fd1,#7c4dff);padding:13px 20px 13px 16px;border-radius:999px;box-shadow:0 10px 28px rgba(28,60,140,.38)}
 .kbf .e{font-size:22px;line-height:1}.kbf:hover{filter:brightness(1.08)}
 .kbf.on{display:none}
-.kbp{position:fixed;right:22px;bottom:22px;z-index:46;width:390px;height:min(600px,calc(100vh - 44px));background:#fff;border-radius:22px;box-shadow:0 24px 60px rgba(10,20,50,.35);display:none;flex-direction:column;overflow:hidden;border:1px solid #e3e9f4}
-.kbp.on{display:flex}
+.kbmask{position:fixed;inset:0;z-index:46;background:rgba(10,18,40,.55);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:18px}
+.kbmask.on{display:flex}
+.kbp{width:min(500px,100%);height:min(680px,calc(100dvh - 36px));background:#fff;border-radius:22px;box-shadow:0 30px 80px rgba(10,20,50,.45);display:flex;flex-direction:column;overflow:hidden;border:1px solid #e3e9f4;animation:kbpop .18s ease}
+@keyframes kbpop{from{transform:translateY(14px) scale(.97);opacity:0}to{transform:none;opacity:1}}
 .kbh{display:flex;align-items:center;gap:10px;padding:14px 14px 14px 16px;color:#fff;background:linear-gradient(120deg,#0f2a5c,#1c6fd1 60%,#6a4cff)}
 .kbh .av{width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:22px}
 .kbh b{font-size:16px;display:block}.kbh small{font-size:12px;opacity:.85}
-.kbh .x{margin-left:auto;border:0;background:rgba(255,255,255,.18);color:#fff;width:32px;height:32px;border-radius:999px;font-size:18px;cursor:pointer}
+.kbh .x{margin-left:auto;border:0;background:#fff;color:#14213f;width:36px;height:36px;border-radius:999px;font-size:22px;line-height:1;font-weight:900;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.25)}.kbh .x:hover{background:#ffe9e9;color:#d1343d}
 .kbl{flex:1;overflow-y:auto;padding:14px;background:#f4f7fc;display:flex;flex-direction:column;gap:10px}
 .kbm{max-width:88%;padding:10px 13px;border-radius:16px;font-size:14px;line-height:1.55;white-space:pre-line;word-break:keep-all}
 .kbm.b{align-self:flex-start;background:#fff;border:1px solid #e3e9f4;border-top-left-radius:4px;color:#14213f}
@@ -218,7 +220,7 @@ html,body{overflow-x:hidden}
 .kbi input{flex:1;min-width:0;font:inherit;font-size:15px;padding:11px 14px;border:2px solid #e3e9f4;border-radius:12px;outline:none}
 .kbi input:focus{border-color:#1c6fd1}
 .kbi button{flex:none;border:0;border-radius:12px;padding:0 16px;font:inherit;font-weight:900;color:#fff;background:#1c6fd1;cursor:pointer}
-@media (max-width:760px){.kbf{right:14px;bottom:14px;padding:12px 15px}.kbf .t{display:none}.kbp{right:0;bottom:0;width:100%;height:100%;max-height:100dvh;border-radius:0}}
+@media (max-width:760px){.kbf{right:14px;bottom:14px;padding:12px 15px}.kbf .t{display:none}.kbmask{padding:0}.kbp{width:100%;height:100dvh;border-radius:0}}
 </style><!--/KSBOT--><script>window.__KITD=[{"key": "2027-1", "m": "2027년 1월", "short": "1월", "theme": "AI탐사로보", "sub": "감각에서 센서, 그리고 AI까지", "color": "#7c4dff", "icon": "🤖", "items": [{"w": 1, "lab": "1월 교구", "t": "AI탐사로보", "kit": "AI탐사로보 교재 3권 (감각·센서·AI)", "goal": "음성인식 센서와 LED가 달린 로봇개 AI탐사로보를 설명서를 보며 만들어 보자", "slug": "ai-tamsarobo", "tb": [{"r": "human-robot-senses", "t": "사람의 감각과 로봇의 감각", "lab": "1주"}, {"r": "sound-sensors-around-us", "t": "우리 주변의 소리를 이용한 센서", "lab": "2주"}, {"r": "sound-ai-sensor", "t": "소리의 원리와 AI 센서의 역할", "lab": "3주"}]}], "games": []}, {"key": "2027-2", "m": "2027년 2월", "short": "2월", "theme": "하늘에서 우주로", "sub": "비행의 원리에서 우주 탐사까지", "color": "#1c6fd1", "icon": "✈️", "items": [{"w": 1, "t": "미로찾기 구슬", "kit": "항공기의 수평과 균형 조종", "goal": "미로찾기 구슬을 설명서를 보며 한 단계씩 만들어 보자", "slug": "maze-marble", "tb": [{"r": "aircraft-balance-control", "t": "항공기의 수평과 균형 조종", "lab": "1주"}]}, {"w": 2, "t": "스핏파이어", "kit": "비행혁신시대", "goal": "스핏파이어를 설명서를 보며 한 단계씩 만들어 보자", "slug": "spitfire", "tb": [{"r": "flight-innovation-era", "t": "비행혁신시대", "lab": "2주"}], "kit_ready": true, "imgfile": "thumb_spitfire.jpg", "teaser": {"url": "https://ohaworld777.github.io/ks-kit-making/spitfire/teaser.mp4", "title": "스핏파이어 교구 소개", "desc": "5초 인트로 영상"}, "url": "https://ohaworld777.github.io/ks-kit-making/spitfire/"}, {"w": 3, "t": "플라이어호", "kit": "최초의 동력비행", "goal": "플라이어호를 설명서를 보며 한 단계씩 만들어 보자", "slug": "flyer", "tb": [{"r": "first-powered-flight", "t": "최초의 동력비행", "lab": "3주"}]}, {"w": 4, "t": "슈퍼히어로", "kit": "우주의 멋진 사진들", "goal": "슈퍼히어로를 설명서를 보며 한 단계씩 만들어 보자", "slug": "superhero", "tb": [{"r": "amazing-space-photos", "t": "우주의 멋진 사진들", "lab": "4주"}]}], "games": []}];window.__OTHER_PROMOS=[{"kit": "spitfire", "title": "스핏파이어 홍보 영상", "url": "https://ohaworld777.github.io/ks-kit-making/spitfire/promo.mp4?v=2", "date": "2026-11", "desc": "잘 날고, 멋있고, 만들기 쉬운 스핏파이어 (20초)"}];</script></head><body>
 <header><div class="hin"><a id="homeA" href="./" title="홈으로"><img id="logo" alt="(주)코리아사이언스"></a><span class="sep"></span><b>항공드론과학 웹 교재</b><small>방과후 수업</small><nav class="seg"><a id="segTb" class="on" href="https://ohaworld777.github.io/ks-web-textbook/">📘 수업 교재</a><a id="segKit" class="" href="https://ohaworld777.github.io/ks-kit-making/">🛠️ 교구 제작</a></nav><button class="hbtn" id="helpBtn" type="button" title="홈페이지 사용법">❓<span> 사용법</span></button><button class="hbtn" id="mapBtn" type="button" title="사이트 맵">🗺️<span> 사이트 맵</span></button><label class="search">🔍 <input id="q" placeholder="교재·교구 이름으로 찾기" autocomplete="off"></label></div></header>
 <section class="hero"><div class="heroin"><span class="kicker">2027 CURRICULUM</span><h1>이번 달 <span>웹 교재</span>로 수업을 시작해요</h1><p>달을 고르고, 카드를 누르면 바로 교재가 열립니다.</p></div></section>
@@ -366,7 +368,8 @@ const FAQ=[
  {k:/사용법|어떻게\s*(써|사용)|도움말|처음/,a:'포털 사용 순서예요.\n1) 위쪽 달 탭(1월·2월)을 골라요\n2) 카드의 「▶ 수업 시작」(교구는 「🛠️ 제작 시작」)을 눌러요\n3) 「🎮 학습 게임」으로 게임, 「🔗 공유」로 학생에게 보내기\n자세한 건 오른쪽 위 「❓ 사용법」에도 있어요.',act:'help'},
  {k:/사이트\s*맵|전체\s*목록|모든\s*(교재|교구|페이지)|목록/,a:'전체 페이지 목록(사이트 맵)을 열어 드릴게요.',act:'map'},
  {k:/교구\s*제작.*(방법|어떻게)|만드는\s*(방법|법)|조립.*(방법|어떻게)/,a:'교구 제작 페이지는 PPT 설명서를 한 쪽씩 보여 줘요. 「🎥 제작 영상」이 있는 교구는 단계마다 「영상으로 보기」를 누르면 그 장면부터 영상이 나와요. 교구 제작 포털에서 「🛠️ 제작 시작」을 눌러 들어가세요.'},
- {k:/안녕|하이|반가|hello|hi\b/i,a:'안녕하세요! 항공드론과학 웹 교재 안내 도우미예요 😊\n교재·교구 이름이나 궁금한 것을 적어 주세요. 예) "스핏파이어", "1월 교재", "PPT 비밀번호", "게임"'},
+ {k:/안녕|하이|반가|hello|hi\b/i,a:'안녕하세요! 저는 코리AI예요 😊\n교재·교구 이름이나 궁금한 것을 적어 주세요. 예) "스핏파이어", "1월 교재", "PPT 비밀번호", "게임"'},
+ {k:/이름|누구|뭐야\s*너|넌\s*누구|너는/,a:'저는 코리AI예요! 코리아사이언스 항공드론과학 웹 교재 안내 도우미랍니다 🤖\n교재·교구·게임·영상을 찾아 드리고, 홈페이지 사용법도 알려 드려요.'},
  {k:/고마|감사|땡큐|thanks/i,a:'천만에요! 또 궁금한 게 있으면 언제든 물어보세요 🙌'}
 ];
 const STOP=/(을|를|이|가|은|는|에서|에|로|으로|의|도|좀|요)$/;
@@ -395,19 +398,19 @@ function find(q){
  return {res:R.map(x=>x[1]),mk,want};
 }
 // ── 화면 ──
-const fab=document.createElement('button');fab.className='kbf';fab.type='button';fab.innerHTML='<span class="e">💬</span><span class="t">무엇이든 물어보세요</span>';
-const P=document.createElement('div');P.className='kbp';
-P.innerHTML=`<div class="kbh"><div class="av">🤖</div><div><b>교재 안내 도우미</b><small>교재·교구·게임·영상을 찾아 드려요</small></div><button class="x" type="button" title="닫기">×</button></div><div class="kbl"></div><div class="kbq"></div><form class="kbi"><input placeholder="예) 스핏파이어, 1월 교재, 비밀번호" autocomplete="off"><button type="submit">보내기</button></form>`;
-document.body.append(fab,P);
+const fab=document.createElement('button');fab.className='kbf';fab.type='button';fab.innerHTML='<span class="e">💬</span><span class="t">코리AI에게 물어보세요</span>';
+const MK=document.createElement('div');MK.className='kbmask';const P=document.createElement('div');P.className='kbp';MK.appendChild(P);
+P.innerHTML=`<div class="kbh"><div class="av">🤖</div><div><b>코리AI</b><small>코리아사이언스 교재 안내 도우미 · 교재·교구·게임·영상을 찾아 드려요</small></div><button class="x" type="button" title="닫기">×</button></div><div class="kbl"></div><div class="kbq"></div><form class="kbi"><input placeholder="예) 스핏파이어, 1월 교재, 비밀번호" autocomplete="off"><button type="submit">보내기</button></form>`;
+document.body.append(fab,MK);MK.addEventListener('click',e=>{if(e.target===MK)close();});
 const L=P.querySelector('.kbl'),I=P.querySelector('input'),Q=P.querySelector('.kbq');
 const QUICK=['이번 달 교재','🎮 학습 게임','🛠️ 교구 제작','🎬 교구 영상','🔒 PPT 받는 법','🔗 공유하는 법','🗺️ 사이트 맵'];
 Q.innerHTML=QUICK.map(x=>`<button type="button">${x}</button>`).join('');
 function say(t,who){const d=document.createElement('div');d.className='kbm '+(who||'b');d.textContent=t;L.appendChild(d);L.scrollTop=L.scrollHeight;return d}
 function cards(list){const w=document.createElement('div');w.className='kbr';
  w.innerHTML=list.map((e,k)=>`<div class="kbc" style="--kc:${e.c||'#1c6fd1'}"><span class="ic">${e.ic}</span><div class="tx"><b>${esc(e.t)}</b><span>${esc(e.sub)}</span></div>${e.url?`<a class="go" data-k="${k}" href="${esc(e.url)}" target="_blank" rel="noopener">${e.btn}</a>`:`<span class="go off">준비 중</span>`}</div>`).join('');
- w.querySelectorAll('a.go').forEach(a=>a.addEventListener('click',ev=>{const e=list[+a.dataset.k];if(e.vid&&typeof openVideo==='function'){ev.preventDefault();P.classList.remove('on');fab.classList.remove('on');openVideo(e.url,e.t,e.sub);}}));
+ w.querySelectorAll('a.go').forEach(a=>a.addEventListener('click',ev=>{const e=list[+a.dataset.k];if(e.vid&&typeof openVideo==='function'){ev.preventDefault();close();openVideo(e.url,e.t,e.sub);}}));
  L.appendChild(w);L.scrollTop=L.scrollHeight;}
-function linkCard(ic,t,sub,url,btn,fn){const e={ic,t,sub,url,btn,c:'#14213f'};cards([e]);if(fn){const a=L.lastChild.querySelector('a.go');a.addEventListener('click',ev=>{ev.preventDefault();fn();});}}
+function linkCard(ic,t,sub,url,btn,fn){const e={ic,t,sub,url,btn,c:'#14213f'};cards([e]);if(fn){const a=L.lastChild.querySelector('a.go');a.addEventListener('click',ev=>{ev.preventDefault();close();fn();});}}
 function answer(q){
  q=q.trim();if(!q)return;say(q,'u');
  const qq=q.replace(/^[^\w가-힣ㄱ-ㅎ]+/,'');
@@ -438,12 +441,13 @@ function show(r,q){
  const top=res[0];if(res.length<=3&&top.type==='tb'){const k=kitD.flatMap(M=>M.items).find(it=>it.kit&&(it.tb||[]).some(x=>x.t===top.t));if(k&&!res.some(e=>e.type==='kit'))say('이 교재와 짝인 교구 「'+k.t.replace(/\s*만들기$/,'')+'」 만들기도 있어요. "'+k.t.replace(/\s*만들기$/,'')+'"라고 물어보세요.');}
 }
 let greeted=false;
-function open(){P.classList.add('on');fab.classList.add('on');if(!greeted){greeted=true;say('안녕하세요! 항공드론과학 웹 교재 안내 도우미예요 😊\n찾고 싶은 교재·교구 이름이나 궁금한 것을 적어 주세요.\n예) "스핏파이어", "2월 교재", "소리 센서", "PPT 비밀번호", "게임"');}setTimeout(()=>I.focus(),50);}
-fab.onclick=open;P.querySelector('.x').onclick=()=>{P.classList.remove('on');fab.classList.remove('on')};
+function close(){MK.classList.remove('on');fab.classList.remove('on');}
+function open(){MK.classList.add('on');fab.classList.add('on');if(!greeted){greeted=true;say('안녕하세요! 저는 코리아사이언스 교재 안내 도우미 코리AI예요 😊\n찾고 싶은 교재·교구 이름이나 궁금한 것을 적어 주세요.\n예) "스핏파이어", "2월 교재", "소리 센서", "PPT 비밀번호", "게임"');}setTimeout(()=>I.focus(),50);}
+fab.onclick=open;P.querySelector('.x').onclick=close;window.addEventListener('keydown',e=>{if(e.key==='Escape'&&MK.classList.contains('on'))close();},true);
 P.querySelector('form').onsubmit=e=>{e.preventDefault();const v=I.value;I.value='';answer(v)};
 Q.addEventListener('click',e=>{const b=e.target.closest('button');if(b)answer(b.textContent)});
-P.addEventListener('keydown',e=>e.stopPropagation());
-window.ksBot={open,ask:q=>{open();answer(q)},find};
+MK.addEventListener('keydown',e=>{if(e.key!=='Escape')e.stopPropagation();});
+window.ksBot={open,close,ask:q=>{open();answer(q)},find};
 if(new URLSearchParams(location.search).get('ask'))setTimeout(()=>window.ksBot.ask(new URLSearchParams(location.search).get('ask')),300);
 })();
 </script><!--/KSBOT--></body></html>
