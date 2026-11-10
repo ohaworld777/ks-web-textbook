@@ -280,7 +280,7 @@ function sha256(s){const K=[],H=[];let n=2,c=0;const isP=x=>{for(let f=2;f*f<=x;
 const unlocked={};try{Object.assign(unlocked,JSON.parse(sessionStorage.getItem('ksU')||'{}'))}catch(e){}
 function saveU(){try{sessionStorage.setItem('ksU',JSON.stringify(unlocked))}catch(e){}}
 // 시작 달: 접속한 달이 커리큘럼에 있으면 그 달, 아니면 첫 달
-let cur=0;{if(new URLSearchParams(location.search).get('v')==='games')setTimeout(()=>{gameMode=true;render();},0);const now=new Date(),key=`${now.getFullYear()}-${now.getMonth()+1}`;const k=D.findIndex(x=>x.key===key);if(k>=0)cur=k;const qs=new URLSearchParams(location.search),qm=qs.get('m');if(qm!==null){const qk=D.findIndex(x=>x.key===qm);if(qk>=0)cur=qk;else if(D[+qm])cur=+qm;}}
+let cur=0;{if(new URLSearchParams(location.search).get('v')==='games')setTimeout(()=>{gameMode=true;render();},0);/*PMONTH*/const monthIdx=t=>{const z=new Date(t.getTime()+9*3600e3),n=z.getUTCFullYear()*12+z.getUTCMonth()+1;const L=D.map((x,i)=>{const a=String(x.key).split('-').map(Number);return {i,n:a[0]*12+a[1]}}).sort((a,b)=>a.n-b.n);const p=L.find(x=>x.n===n)||L.find(x=>x.n>n)||L[L.length-1];return p?p.i:0;};cur=monthIdx(new Date());const qs=new URLSearchParams(location.search),qm=qs.get('m');if(qm!==null){const qk=D.findIndex(x=>x.key===qm);if(qk>=0)cur=qk;else if(D[+qm])cur=+qm;}else{try{fetch(location.href.split('#')[0],{method:'HEAD',cache:'no-store'}).then(r=>{const d=r.headers.get('date');if(!d||isNaN(Date.parse(d)))return;const i=monthIdx(new Date(d));if(i!==cur&&!window.__tabTouched){cur=i;if(typeof render==='function')render();if(typeof segSync==='function')segSync();}}).catch(()=>{})}catch(_){}}}
 let year=false,gameMode=false;
 const ALL=D.flatMap((M,mi)=>M.items.map((it,ii)=>({...it,mi,ii})).concat((M.games||[]).map((g,gi)=>({t:'🎮 '+g.t,kit:'이달의 게임',goal:g.desc||'',url:g.url,img:g.img,qr:g.qr,w:'게임',lab:'게임',mi,ii:-1,game:true,gi}))));
 function pairTb(it){if(!it.kitgo)return '';const k=(typeof KITS!=='undefined'&&KITS[it.kitgo])||null;
@@ -352,7 +352,7 @@ function ask(a,mi,ii){const M=D[mi];
   else{document.getElementById('err').textContent='비밀번호가 맞지 않아요';modal.classList.remove('shake');void modal.offsetWidth;modal.classList.add('shake');pw.select();}};}
 document.addEventListener('click',e=>{if(e.target.closest('#gameTab')){gameMode=!gameMode;year=false;render();return;}
  const gs=e.target.closest('.gshare');if(gs){const [mi,gi]=gs.dataset.g.split(':').map(Number);const g=D[mi].games[gi];openShare({t:g.t,url:g.url,qr:g.qr,lab:'이달의 게임',w:''},mi);return;}
- const t=e.target.closest('[data-tab]');if(t){cur=+t.dataset.tab;year=false;gameMode=false;render();return}
+ const t=e.target.closest('[data-tab]');if(t){window.__tabTouched=true;cur=+t.dataset.tab;year=false;gameMode=false;render();return}
  const b=e.target.closest('[data-a]');if(b){ask(b.dataset.a,+b.dataset.m,+b.dataset.i);}});
 document.getElementById('vMonth').onclick=()=>{year=false;gameMode=false;render()};document.getElementById('vYear').onclick=()=>{year=true;gameMode=false;render()};
 document.getElementById('q').addEventListener('input',render);
