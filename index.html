@@ -326,7 +326,7 @@ function render(){
  document.getElementById('yt').innerHTML=(n=>'<tr><th>달</th>'+Array.from({length:n},(_,k)=>`<th>${k+1}주차</th>`).join('')+'</tr>')(Math.max(...D.map(x=>x.items.length)))+D.map((x,mi)=>`<tr><td class="mo" style="color:${x.color}">${x.short}<span class="k" style="font-weight:600">${x.theme}</span></td>`+x.items.map((it,ii)=>`<td class="go2 ${it.mission?'ms':''}" data-a="open" data-m="${mi}" data-i="${ii}">${it.mission?'🎯 ':''}${it.t}<span class="k">${it.kit}</span></td>`).join('')+'<td class="pd">—</td>'.repeat(Math.max(...D.map(y=>y.items.length))-x.items.length)+'</tr>').join('');
 }
 const mask=document.getElementById('mask'),modal=document.getElementById('modal');
-function closeM(){mask.classList.remove('on');if(modal.classList.contains('vmodal')){modal.innerHTML='';modal.className='modal';}}
+function closeM(){mask.classList.remove('on');modal.querySelectorAll('iframe,video,audio').forEach(x=>{try{x.pause&&x.pause()}catch(_){}x.remove()});if(modal.classList.contains('vmodal')){modal.innerHTML='';modal.className='modal';}}
 mask.addEventListener('click',e=>{if(e.target===mask)closeM()});
 document.addEventListener('keydown',e=>{if(e.key==="Escape")closeM()});
 function openShare(it,mi){const M=D[mi];modal.style.setProperty('--c',M.color);
