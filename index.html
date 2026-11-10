@@ -456,7 +456,7 @@ function thisMonth(){const t=new Date(Date.now()+KOFF+9*3600e3),y=t.getUTCFullYe
 function find(q){
  const nq=N(q),tk=tokens(q),mm=q.match(/(\d{1,2})\s*월/);let mk=null;
  if(mm){const m=months.find(M=>new RegExp('(^|\\D)'+mm[1]+'월').test(M.short+M.m));mk=m?m.key:'none';}
- {const R=dateRef(q);DRQ=R;if(R){if(months.some(M=>/\*/.test(M.m))){if(R.hasM)mk=months[0].key;}else if(R.hasM){const k=keyOf(R.y,R.m);mk=k||(R.cur?thisMonth().key:'none');}}}
+ {const R=dateRef(q);DRQ=R;if(R){if(months.some(M=>/\*/.test(M.m))){if(R.hasM)mk=months[0].key;}else if(R.hasM){const k=keyOf(R.y,R.m);if(k)mk=k;else if(R.cur){const T=thisMonth(),MM=months.find(M=>M.key===T.key);mk=T.key;const a=String(T.key).split('-').map(Number),fut=a[0]*12+a[1]>R.y*12+R.m;const w0=R.w;if(R.w&&fut)R.w=1;R.note=`오늘은 ${R.y}년 ${R.m}월${w0?' '+w0+'주차예요':'이에요'}. 그때 교재는 아직 없어서 가장 가까운 ${MM?MM.m:''}${R.w?' '+R.w+'주차':''} 교재를 보여 드릴게요.`;}else mk='none';}}}
  let want=null;if(/게임/.test(q))want='game';else if(/영상|티저|홍보|소개\s*영상/.test(q))want='video';else if(/교구|만들기|제작|조립/.test(q))want='kit';else if(/교재|수업/.test(q))want='tb';
  const isCho=/^[ㄱ-ㅎ]+$/.test(q.replace(/\s/g,''));
  let R=E.map(e=>{let s=0;
@@ -588,7 +588,7 @@ function answer(q){
  const gt=GUIDE.find(g=>g.t===q);if(gt){gsay(gt.a);return;}
  if(/^교재\s*사용법$/.test(qq)||(GUIDE_ALL.test(q)&&!GUIDE.some(g=>g.k.test(q)))){gsay(GUIDE_INTRO);return;}
  const gk=GUIDE.find(g=>g.k.test(q));if(gk&&!/^(이번\s*달|학습\s*게임|교구\s*제작|교구\s*영상)$/.test(qq)&&(GUIDE_ALL.test(q)||/법|방법|어떻게|안\s*(돼|되|나와|열려)|하려면|하나요|해요\?|뭐야|\?$/.test(q)||!find(q).res.length)){gsay(gk.a);return;}
- if(/^이번\s*달\s*(교재|교구)?$/.test(qq)){const T=thisMonth(),MM=months.find(M=>M.key===T.key),hid=months.some(M=>/\*/.test(M.m));if(!hid)say(T.exact?`오늘은 ${T.y}년 ${T.m}월이에요. 이번 달 교재를 보여 드릴게요.`:`오늘은 ${T.y}년 ${T.m}월이에요. ${T.m}월 교재는 아직 없어서 가장 가까운 ${MM?MM.m:''} 교재를 보여 드릴게요.`);return show(find(typeof SITE!=='undefined'&&SITE==='kit'?'이번 달 교구':'이번 달 교재'),'이번 달');}
+ if(/^이번\s*달\s*(교재|교구)?$/.test(qq)){return show(find(typeof SITE!=='undefined'&&SITE==='kit'?'이번 달 교구':'이번 달 교재'),'이번 달');}
  if(/^학습\s*게임$/.test(qq))return show(find('게임'),'게임');
  if(/^교구\s*제작$/.test(qq))return show(find('교구'),'교구');
  if(/^교구\s*영상$/.test(qq))return show(find('영상'),'영상');
@@ -608,6 +608,7 @@ function answer(q){
 function show(r,q){
  const {res,mk,want}=r;
  if(mk==='none'){say((DRQ&&DRQ.label?DRQ.label+' 교재는':'그 달 교재는')+' 아직 준비 중이에요. 지금은 '+months.map(M=>M.m+'('+M.theme+')').join(', ')+' 교재가 있어요.');return;}
+ if(DRQ&&DRQ.note){say(DRQ.note);DRQ.note='';}
  LASTR=r;LASTOFF=0;
  if(!res.length){const sg=suggest(q);
   if(sg.length){say(pick(['음… 정확히 맞는 걸 찾지 못했어요. 혹시 이걸 찾으셨나요? 👇','제가 잘 이해했는지 모르겠어요. 아래 중에 있을까요? 👇']));const w=document.createElement('div');w.className='kbg';w.innerHTML=sg.map(t=>`<button type="button">${esc(t)}</button>`).join('');w.onclick=e=>{const b=e.target.closest('button');if(b)answer(b.textContent);};L.appendChild(w);L.scrollTop=L.scrollHeight;return;}
