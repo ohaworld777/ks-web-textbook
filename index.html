@@ -286,7 +286,7 @@ const ALL=D.flatMap((M,mi)=>M.items.map((it,ii)=>({...it,mi,ii})).concat((M.game
 function pairTb(it){if(!it.kitgo)return '';const k=(typeof KITS!=='undefined'&&KITS[it.kitgo])||null;
  return `<div class="pair"><span class="pl">교구 만들기</span>${k&&k.url?`<a href="${k.url}" target="_blank" rel="noopener">🛠️ ${it.kitname} 만들기 →</a>`:`<span class="off">🛠️ ${it.kitname} (준비 중)</span>`}</div>`;}
 function kitTz(it){const k=it.kitgo&&KITS[it.kitgo];return k&&k.teaser&&k.teaser.url?k:null;}
-function kitTag(it){return kitTz(it)?`<a class="kit kv" data-tz="${it.mi}:${it.ii}" title="교구 소개 영상 보기">🧩 ${it.kit} <b>▶ 소개 영상</b></a>`:`<span class="kit">🧩 ${it.kit}</span>`;}
+function kitTag(it){return kitTz(it)?`<a class="kit kv" data-tz="${it.mi}:${it.ii}" title="교구 소개 영상 보기">🧩 ${it.kit} <b>▶</b></a>`:`<span class="kit">🧩 ${it.kit}</span>`;}
 function isMp4(u){return /\.(mp4|webm|m4v)(\?|#|$)/i.test(u);}
 function embedUrl(u,auto){const v=u.match(/vimeo\.com\/(?:video\/)?(\d+)(?:\/([0-9a-f]+))?/);if(v)return `https://player.vimeo.com/video/${v[1]}?${v[2]?'h='+v[2]+'&':''}title=0&byline=0&portrait=0&dnt=1&playsinline=1${auto?'&autoplay=1':''}`;
  const y=u.match(/(?:youtu\.be\/|v=|\/embed\/|\/shorts\/)([\w-]{11})/);if(y)return `https://www.youtube.com/embed/${y[1]}?rel=0&playsinline=1${auto?'&autoplay=1':''}`;return u;}
