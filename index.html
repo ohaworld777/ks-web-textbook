@@ -453,6 +453,44 @@ function dateRef(q0){const q=q0.replace(/\s+/g,''),N=kNow();let y=N.y,m=N.m,hasM
  return {y,m,w,cur,hasM,label:hasM?`${y}년 ${m}월${w?' '+w+'주차':''}`:''};}
 function wkOnly(q){const k=q.match(/(\d)주차?/);return k?{w:+k[1],hasM:false,label:''}:null;}
 function thisMonth(){const t=new Date(Date.now()+KOFF+9*3600e3),y=t.getUTCFullYear(),m=t.getUTCMonth()+1,n=y*12+m;const L=months.map(M=>{const a=String(M.key).split('-').map(Number);return {k:M.key,n:a[0]*12+a[1]}}).sort((a,b)=>a.n-b.n);let p=L.find(x=>x.n===n)||L.find(x=>x.n>n)||L[L.length-1];return {key:p?p.k:null,y,m,exact:!!p&&p.n===n};}
+/*KWX*/
+const WXC={'서울':[37.5665,126.978],'부산':[35.1796,129.0756],'대구':[35.8714,128.6014],'인천':[37.4563,126.7052],'광주':[35.1595,126.8526],'대전':[36.3504,127.3845],'울산':[35.5384,129.3114],'세종':[36.48,127.289],
+'수원':[37.2636,127.0286],'성남':[37.42,127.1267],'고양':[37.6584,126.832],'용인':[37.2411,127.1776],'부천':[37.5034,126.766],'안산':[37.3219,126.8309],'안양':[37.3943,126.9568],'남양주':[37.636,127.2165],'화성':[37.1995,126.8312],'평택':[36.9921,127.1129],'의정부':[37.738,127.0337],'파주':[37.76,126.78],'김포':[37.6152,126.7156],'광명':[37.4786,126.8646],'시흥':[37.38,126.8029],'하남':[37.5393,127.2149],
+'창원':[35.2279,128.6811],'김해':[35.2285,128.8894],'양산':[35.335,129.0372],'진주':[35.18,128.1076],'거제':[34.8806,128.6211],'통영':[34.8544,128.4332],'포항':[36.019,129.3435],'경주':[35.8562,129.2247],'구미':[36.1195,128.3446],'안동':[36.5684,128.7294],'김천':[36.1398,128.1136],
+'청주':[36.6424,127.489],'충주':[36.991,127.926],'천안':[36.8151,127.1139],'아산':[36.7898,127.0019],'전주':[35.8242,127.148],'군산':[35.9676,126.7366],'익산':[35.9483,126.9577],'목포':[34.8118,126.3922],'여수':[34.7604,127.6622],'순천':[34.9506,127.4872],
+'춘천':[37.8813,127.7298],'원주':[37.3422,127.9202],'강릉':[37.7519,128.8761],'속초':[38.207,128.5918],'제주':[33.4996,126.5312],'서귀포':[33.2541,126.56],'기장':[35.2446,129.2222],'해운대':[35.1631,129.1636]};
+const WXN={0:['맑음','☀️'],1:['대체로 맑음','🌤️'],2:['구름 조금','⛅'],3:['흐림','☁️'],45:['안개','🌫️'],48:['짙은 안개','🌫️'],51:['약한 이슬비','🌦️'],53:['이슬비','🌦️'],55:['강한 이슬비','🌧️'],56:['어는 이슬비','🌧️'],57:['어는 이슬비','🌧️'],
+61:['약한 비','🌦️'],63:['비','🌧️'],65:['강한 비','🌧️'],66:['어는 비','🌧️'],67:['어는 비','🌧️'],71:['약한 눈','🌨️'],73:['눈','🌨️'],75:['많은 눈','❄️'],77:['싸락눈','🌨️'],80:['약한 소나기','🌦️'],81:['소나기','🌧️'],82:['강한 소나기','⛈️'],85:['눈 소나기','🌨️'],86:['강한 눈 소나기','❄️'],95:['뇌우','⛈️'],96:['뇌우·우박','⛈️'],99:['강한 뇌우·우박','⛈️']};
+const wxName=c=>WXN[c]||['날씨 정보 없음','🌡️'];
+function wxAsk(raw){const t=raw.replace(/\s+/g,'');
+ if(!/날씨|기온|온도|일기예보|기상|우산|미세먼지|초미세|황사|(비|눈)(가|이)?(와|와요|오나|오니|올까|올래|내려|내리|소식)|(덥|춥)(니|나|냐|어|지|을까|겠)|바람(이|은)?(세|불|많|강|어때|부)|맑(아|니|나|을까)|흐려|흐리/.test(t))return false;
+ if(/음성|소리|센서|원리|뭐야|이란|이야\?|란\?/.test(t)&&!/날씨|기온|우산|미세먼지/.test(t))return false;
+ const day=/모레/.test(t)?2:/내일/.test(t)?1:0, dust=/미세먼지|초미세|황사|공기질/.test(t), here=/내위치|현재위치|여기|우리동네|이곳/.test(t);
+ let city=Object.keys(WXC).sort((a,b)=>b.length-a.length).find(c=>t.includes(c));
+ say(pick(['날씨를 알아보는 중이에요… ⛅','잠깐만요, 하늘을 살펴볼게요… 🔭']));
+ const go=(lat,lon,name)=>wxGet(lat,lon,name,day,dust);
+ if(here&&navigator.geolocation){navigator.geolocation.getCurrentPosition(p=>go(p.coords.latitude,p.coords.longitude,'지금 계신 곳'),()=>{say('위치 권한이 없어서 서울 날씨로 알려 드릴게요.');go(...WXC['서울'],'서울');},{timeout:8000,maximumAge:600000});return true;}
+ if(city){go(...WXC[city],city);return true;}
+ const m=raw.match(/([가-힣]{2,6}?)(시|군|구|도)?\s*(의\s*)?(날씨|기온|미세먼지)/);const nm=m&&m[1]&&!/오늘|내일|모레|지금|요즘|이번|우리|여기|현재/.test(m[1])?m[1]:null;
+ if(nm){fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language=ko&countryCode=KR&name='+encodeURIComponent(nm)).then(r=>r.json()).then(j=>{const g=j.results&&j.results[0];if(g)go(g.latitude,g.longitude,nm);else{say('「'+nm+'」 지역을 찾지 못해서 서울 날씨로 알려 드릴게요.');go(...WXC['서울'],'서울');}}).catch(()=>go(...WXC['서울'],'서울'));return true;}
+ go(...WXC['서울'],'서울');return true;}
+function wxGet(lat,lon,name,day,dust){
+ const u='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+'&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&timezone=Asia%2FSeoul&forecast_days=3&wind_speed_unit=ms';
+ const ua='https://air-quality-api.open-meteo.com/v1/air-quality?latitude='+lat+'&longitude='+lon+'&current=pm10,pm2_5&timezone=Asia%2FSeoul';
+ Promise.all([fetch(u).then(r=>r.json()),dust?fetch(ua).then(r=>r.json()).catch(()=>null):Promise.resolve(null)]).then(([j,aq])=>{
+  const d=j.daily,c=j.current,lab=['오늘','내일','모레'][day],r1=x=>Math.round(x*10)/10;
+  const code=day===0&&c?c.weather_code:d.weather_code[day],[wn,ic]=wxName(code),pp=d.precipitation_probability_max[day],wmax=day===0&&c?Math.max(c.wind_speed_10m,0):d.wind_speed_10m_max[day];
+  let s=day===0&&c?`${ic} ${name} 지금 날씨: ${wn}, ${r1(c.temperature_2m)}℃ (체감 ${r1(c.apparent_temperature)}℃)\n🌡️ 오늘 최저 ${Math.round(d.temperature_2m_min[0])}℃ / 최고 ${Math.round(d.temperature_2m_max[0])}℃\n💧 비 올 확률 ${pp??'-'}% · 💨 바람 ${r1(c.wind_speed_10m)}m/s · 습도 ${c.relative_humidity_2m}%`
+   :`${ic} ${name} ${lab} 날씨: ${wn}\n🌡️ 최저 ${Math.round(d.temperature_2m_min[day])}℃ / 최고 ${Math.round(d.temperature_2m_max[day])}℃\n💧 비 올 확률 ${pp??'-'}% · 💨 바람 최대 ${r1(d.wind_speed_10m_max[day])}m/s`;
+  let bad=false;if(aq&&aq.current){const g=(v,a,b,cc)=>v<=a?'좋음':v<=b?'보통':v<=cc?'나쁨':'매우 나쁨';s+=`\n😷 미세먼지 ${Math.round(aq.current.pm10)}㎍/㎥(${g(aq.current.pm10,30,80,150)}) · 초미세먼지 ${Math.round(aq.current.pm2_5)}㎍/㎥(${g(aq.current.pm2_5,15,35,75)})`;
+   if(aq.current.pm10>80||aq.current.pm2_5>35){s+='\n공기가 나빠요. 야외 활동은 줄이고 실내 수업을 추천해요.';bad=true;}}
+  const wmx=d.wind_speed_10m_max[day];
+  if(pp>=60||[61,63,65,66,67,80,81,82,95,96,99].includes(code))s+='\n☔ 비 소식이 있어요. 글라이더·비행기 날리기는 실내에서 해요.';
+  else if([71,73,75,77,85,86].includes(code))s+='\n⛄ 눈 소식이 있어요. 날리기 활동은 실내에서 해요.';
+  else if(wmx>=6)s+='\n🌬️ 바람이 세요. 글라이더·비행기 날리기는 실내나 바람 없는 곳에서 하는 게 좋아요.';
+  else if(wmx<4&&!bad)s+='\n🛫 바람이 약해서 밖에서 글라이더 날리기 좋은 날씨예요!';
+  say(s+'\n(날씨 정보: Open-Meteo)');
+ }).catch(()=>say('날씨 정보를 불러오지 못했어요 🥲 잠시 뒤 다시 물어봐 주세요.'));}
 function find(q){
  const nq=N(q),tk=tokens(q),mm=q.match(/(\d{1,2})\s*월/);let mk=null;
  if(mm){const m=months.find(M=>new RegExp('(^|\\D)'+mm[1]+'월').test(M.short+M.m));mk=m?m.key:'none';}
@@ -580,6 +618,7 @@ function answer(q){
  if(!replaying)LOG.push(q);
  say(q,'u');
  RAW=q;q=syn(q);
+ if(wxAsk(RAW))return;
  {const tq=q.replace(/\s+/g,''),N=kNow(),WD='일월화수목금토'[N.wd];
   if(/몇시|지금시간|현재시간|시각|몇분/.test(tq)&&!/몇시간/.test(tq)){say(`지금은 ${N.h<12?'오전':'오후'} ${N.h%12||12}시 ${N.mi}분이에요. (한국 시간)`);return;}
   if(/(오늘|지금|현재)[가-힣]*(며칠|몇월|날짜|요일|몇일)|무슨요일|몇월며칠|오늘날짜|오늘이며칠/.test(tq)){say(`오늘은 ${N.y}년 ${N.m}월 ${N.d}일 ${WD}요일이에요.\n"이번 달 교재", "다음 달 교재", "이번 주 교재"처럼 물어보면 그때 수업할 교재를 찾아 드려요.`);return;}}
